@@ -13,6 +13,9 @@ def load_model(model_name):
     """Load model and tokenizer with caching"""
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    # Always use CPU for Streamlit Cloud compatibility
+    model = model.to("cpu")
+    model.eval()
     return tokenizer, model
 
 # Page configuration
@@ -160,10 +163,8 @@ if summarize_button:
                 st.info("📥 Loading model (first run may take a minute)...")
                 tokenizer, model = load_model(model_name)
                 
-                # Move to CPU (no GPU assumption)
-                device = torch.device("cpu")
-                model.to(device)
-                model.eval()
+                # Use CPU device (Streamlit Cloud compatible)
+                device = "cpu"
                 
                 # Prepare input
                 article_text = user_article.strip()
