@@ -7,6 +7,14 @@ import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
+# Cache model loading to improve performance
+@st.cache_resource
+def load_model(model_name):
+    """Load model and tokenizer with caching"""
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    return tokenizer, model
+
 # Page configuration
 st.set_page_config(
     page_title="News Summarizer",
@@ -148,10 +156,9 @@ if summarize_button:
             # Show loading spinner
             with st.spinner("🔄 Loading model and generating summary..."):
                 
-                # Load model and tokenizer
+                # Load model and tokenizer using cache
                 st.info("📥 Loading model (first run may take a minute)...")
-                tokenizer = AutoTokenizer.from_pretrained(model_name)
-                model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+                tokenizer, model = load_model(model_name)
                 
                 # Move to CPU (no GPU assumption)
                 device = torch.device("cpu")
